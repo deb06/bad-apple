@@ -151,8 +151,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 ffmpeg.exe
-bad_apple.mp4
 /frame
 /txt
 /.vscode
 *.wav
+*.mp4

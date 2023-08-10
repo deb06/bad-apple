@@ -1,4 +1,5 @@
 import os
+import cv2
 from PIL import Image
 from just_playback import Playback
 
@@ -18,6 +19,7 @@ if int(fps) > 60:
     print("Framerate is too high!\n Max: 60")
     exit()
 
+# Clean Directories
 def clear_dir(dir):
     for i in os.listdir(dir):
         os.remove(f"{dir}\\{i}")
@@ -35,7 +37,16 @@ else:
     clear_dir(txt_dir)
 
 # Processing Video
-os.system(f"ffmpeg -i {video} -vf scale=160:120,fps={int(fps)} {frame_dir}\\%05d.png")
+vid = cv2.VideoCapture(video)
+
+h = vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+w = vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+height = round(h / 6)
+width = round(w / 6)
+
+os.system(f"mode {width},{height}")
+os.system(f"ffmpeg -i {video} -vf scale={width}:{height},fps={int(fps)} {frame_dir}\\%05d.png")
 
 audio = video.replace("mp4","wav")
 
@@ -49,7 +60,7 @@ def create_ascii(fr, out):
     img = Image.open(fr)
     width, height = img.size
     aspect_ratio = height/width
-    new_width = 160
+    new_width = width
     new_height = aspect_ratio * new_width * 0.55
     img = img.resize((new_width, int(new_height)))
 
@@ -57,7 +68,6 @@ def create_ascii(fr, out):
     chars = ["B", "S", "#", "&", "@", "$", "%", "*", "!", ".", " "]
     width, height = img.size
     pixels = img.getdata()
-    print(pixels)
     new_pixels = [chars[pixel//25] for pixel in pixels]
     new_pixels = ''.join(new_pixels)
     new_pixels_count = len(new_pixels)
@@ -66,6 +76,8 @@ def create_ascii(fr, out):
 
     with open(f"{out}.txt", "w") as f:
         f.write(ascii_image)
+    
+    print(f"{fr} --> {out}.txt")
 
 for i in os.listdir(frame_dir):
     name = i.replace(".png", "")
@@ -79,20 +91,10 @@ playback.play()
 frames = os.listdir(txt_dir)
 frame_count = len(frames)
 
-while(playback.curr_pos < playback.duration):
+while(playback.curr_pos + 0.01 < playback.duration):
     percentage = playback.curr_pos / float(playback.duration)
     percentage = float(percentage)
     frame = int(percentage * frame_count)
 
     with open(f"{txt_dir}\\{frames[frame]}",mode="r") as f:
         print(f.read())
-
-
-# Cleaning
-clear_dir(frame_dir)
-os.removedirs(frame_dir)
-
-clear_dir(txt_dir)
-os.removedirs(frame_dir)
-
-os.remove(audio)  
