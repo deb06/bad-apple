@@ -152,3 +152,7 @@ cython_debug/
 #.idea/
 ffmpeg.exe
 bad_apple.mp4
+/frame
+/txt
+/.vscode
+*.wav
